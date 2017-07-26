@@ -1,0 +1,1231 @@
+<?php 
+#header( "location: http://www.google.com" );
+session_start();
+
+#if($_SESSION['user']){ echo $_SESSION['user'];}
+
+if (!isset($_SESSION['user'])) {
+header('Location: login.html'); 
+}
+#session_destroy();
+?>
+
+<!doctype html>
+<html>
+
+<head>
+
+    <!--Date Picker-->    
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <link rel="stylesheet" type="text/css" href="datepicker/codebase/fonts/font_roboto/roboto.css"/>
+    <link rel="stylesheet" type="text/css" href="datepicker/codebase/dhtmlxcalendar.css"/>
+    <script src="datepicker/codebase/dhtmlxcalendar.js"></script>
+
+    <!--Export-->
+    
+
+    <meta charset="UTF-8">
+    <!--IE Compatibility modes-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--Mobile first-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Operation Center</title>
+    <link rel="shortcut icon" href="http://download.seaicons.com/download/i2968/ariil/alphabet/ariil-alphabet-letter-b.ico" />
+    <meta name="description" content="Free Admin Template Based On Twitter Bootstrap 3.x">
+    <meta name="author" content="">
+    
+    <meta name="msapplication-TileColor" content="#5bc0de" />
+    <meta name="msapplication-TileImage" content="assets/img/metis-tile.png" />
+    
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="assets/lib/bootstrap/css/bootstrap.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="assets/lib/font-awesome/css/font-awesome.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- Metis core stylesheet -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    
+    <!-- metisMenu stylesheet -->
+    <link rel="stylesheet" href="assets/lib/metismenu/metisMenu.css">
+    
+    <!-- animate.css stylesheet -->
+    <link rel="stylesheet" href="assets/lib/animate.css/animate.css">
+
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.2.5/fullcalendar.min.css">
+
+    <style>
+        .switch {
+          float: right;
+          position: relative;
+          display: inline-block;
+          width: 70px;
+          height: 34px;
+          margin-top: 5px;
+          margin-right: 15px;
+        }
+
+        .switch input {display:none;}
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+
+        input:checked + .slider {
+          background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(35px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+          border-radius: 34px;
+        }
+
+        .slider.round:before {
+          border-radius: 50%;
+        }
+    </style>
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+    <!--For Development Only. Not required -->
+    <script>
+        less = {
+            env: "development",
+            relativeUrls: false,
+            rootpath: "/assets/"
+        };
+
+        var myCalendar;                    
+        function doOnLoad() {
+
+            myCalendar = new dhtmlXCalendarObject("start_date");  
+            myCalendar = new dhtmlXCalendarObject("end_date");  
+            myCalendar.setDateFormat("%Y-%m-%d");                    
+        }
+
+        var tb_user = [`user_id`, `fname`, `lname`, `gender`, `email`, `phone`, `company`, `created_at`];
+        var tb_head = [`service_id`, `service_subject`, `date`, `contact_name`, `contact_number`, `contact_email`, `contact_company`, `estimate_id`, `project_name`, `created_by`, `duty`, `urgent`, `description`, `request_date`, `status`, `created_at`, `updated_at`];
+        var tb_details = [`service_id`, `type`, `brand`, `model`, `serial`, `description`, `created_at`, `updated_at`];
+        var tb_action = [`service_id`, `action_time`, `action_by`, `action_desc`, `action_to`, `status`, `created_at`];
+
+        var query = {   
+                        'user':[],
+                        'service_head':[],
+                        'service_details':[],
+                        'service_action':[]
+                    };
+
+        var froms_select = {   
+                        'user':'',
+                        'service_head':'',
+                        'service_details':'',
+                        'service_action':''
+                    };
+
+        var where = {
+                        'con_column':'',
+                        'con_table':'',
+                        'operator':'',
+                        'first_variable':'',
+                        'second_variable':'',
+                        'date_column':'',
+                        'date_table':'',
+                        'start':'',
+                        'end':''
+                    };
+
+        function box_checked(value, status, text){                        
+                        
+                        if (value === "user") {
+                            if (status) {
+                                addList(tb_user, value, text);
+                            } else {
+                                removeList(tb_user, value, text);
+                            }                            
+                        } else if (value === "service_head") {
+                            if (status) {
+                                addList(tb_head, value, text);
+                            } else {
+                                removeList(tb_head, value, text);
+                            } 
+                        } else if (value === "service_details") {
+                            if (status) {
+                                addList(tb_details, value, text);
+                            } else {
+                                removeList(tb_details, value, text);
+                            } 
+                        } else if (value === "service_action") {
+                            if (status) {
+                                addList(tb_action, value, text);
+                            } else {
+                                removeList(tb_action, value, text);
+                            } 
+                        } else {
+                            alert("Something error please refrash page");
+                        }
+                  }
+
+        function addList(list, table, text){
+            list.forEach(function(item){
+                
+                var con_column = document.getElementById('condition_column');
+                var option1 = document.createElement('option');
+                option1.id = table;
+                option1.text = text+'.'+item;
+                option1.value = item;
+                con_column.add(option1); 
+
+                var show_list = document.getElementById('StaffList');
+                var option = document.createElement('option');
+                option.id = table;
+                option.text = text+'.'+item;
+                option.value = item;
+                show_list.add(option);
+
+                var date_column = document.getElementById('date_column');
+                var date = document.createElement('option');
+                if (    
+                        item == 'date' || 
+                        item == 'created_at' || 
+                        item == 'updated_at' || 
+                        item == 'request_date'
+                    ) {
+
+                    date.id = table;
+                    date.text = text+'.'+item;
+                    date.value = item;
+                    date_column.add(date);
+                }
+                 
+                
+            });            
+        }
+
+
+        function removeList(list, table, text){
+            list.forEach(function(item){
+                var selectobject=document.getElementById('StaffList')
+                  for (var i=0; i<selectobject.length; i++){
+                  if (selectobject.options[i].text == text+'.'+item )
+                     selectobject.remove(i);
+                  }
+
+                var selectobject=document.getElementById('PresentList')
+                  for (var i=0; i<selectobject.length; i++){
+                  if (selectobject.options[i].text == text+'.'+item )
+                     selectobject.remove(i);
+                  }
+
+                var selectobject=document.getElementById('condition_column')
+                  for (var i=0; i<selectobject.length; i++){
+                  if (selectobject.options[i].text == text+'.'+item )
+                     selectobject.remove(i);
+                  }
+
+                var selectobject=document.getElementById('date_column')
+                  for (var i=0; i<selectobject.length; i++){
+                  if (selectobject.options[i].text == text+'.'+item )
+                     selectobject.remove(i);
+                  }
+            });            
+        }         
+    </script>
+    <link rel="stylesheet" href="assets/css/style-switcher.css">
+    <link rel="stylesheet/less" type="text/css" href="assets/less/theme.less">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.7.1/less.js"></script>
+
+    
+
+  </head>
+
+        <body onload="doOnLoad();" class="  ">
+            <div class="bg-dark dk" id="wrap">
+                <div id="top">
+                    <!-- .navbar -->
+                    <nav class="navbar navbar-inverse navbar-static-top">
+                        <div class="container-fluid">
+                    
+                    
+                            <!-- Brand and toggle get grouped for better mobile display -->
+                            <header class="navbar-header">
+                    
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                                <a href="index.html" class="navbar-brand"><img src="assets/img/logo.png" alt=""></a>
+                    
+                            </header>
+                    
+                    
+                    
+                            <div class="topnav">
+                                <div class="btn-group">
+                                    <a data-placement="bottom" data-original-title="Fullscreen" data-toggle="tooltip"
+                                       class="btn btn-default btn-sm" id="toggleFullScreen">
+                                        <i class="glyphicon glyphicon-fullscreen"></i>
+                                    </a>
+                                </div>
+                                
+                                <div class="btn-group">
+                                    <a href="setting.html" data-toggle="tooltip" data-original-title="Setting" data-placement="bottom"
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fa fa-cog"></i>
+                                    </a>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="login.html" data-toggle="tooltip" data-original-title="Logout" data-placement="bottom"
+                                       class="btn btn-metis-1 btn-sm">
+                                        <i class="fa fa-power-off"></i>
+                                    </a>
+                                </div>
+                                <div class="btn-group">
+                                    <a data-placement="bottom" data-original-title="Show / Hide Left" data-toggle="tooltip"
+                                       class="btn btn-primary btn-sm toggle-left" id="menu-toggle">
+                                        <i class="fa fa-bars"></i>
+                                    </a>
+                                    <a data-placement="bottom" data-original-title="Show / Hide Right" data-toggle="tooltip"
+                                       class="btn btn-default btn-sm toggle-right">
+                                        <span class="glyphicon glyphicon-comment"></span>
+                                    </a>
+                                </div>                    
+                            </div>
+                    
+                    
+                            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                    
+                                <!-- .nav -->
+                                <ul class="nav navbar-nav">
+                                    <!-- <li><a href="calendar.html">Calendar</a></li>
+                                    <li><a href="claim.html">Claim</a></li> -->
+                                    <li class="active"><a href="service-dashboard.html">Service</a></li>
+                                    <!-- <li><a href="project.html">Project</a></li>
+                                    <li><a href="report.html">Report</a></li>
+                                    <li><a href="faq.html">FAQ</a></li> -->                   
+                                </ul>
+                                <!-- /.nav -->
+                            </div>
+                        </div>
+                        <!-- /.container-fluid -->
+                    </nav>
+                    <!-- /.navbar -->                        <header class="head">
+                                <div class="search-bar">
+                                    <form class="main-search" action="">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="Live Search ...">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-primary btn-sm text-muted" type="button">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </form>
+                                    <!-- /.main-search -->                                </div>
+                                <!-- /.search-bar -->
+                            <div class="main-bar">
+                                <h3>
+              <i class="fa fa-file-text"></i>&nbsp;
+            Report
+          </h3>
+                            </div>
+                            <!-- /.main-bar -->
+                        </header>
+                        <!-- /.head -->
+                </div>
+                <!-- /#top -->
+                    <div id="left">
+                        <div class="media user-media bg-dark dker">
+                            <div class="user-media-toggleHover">
+                                <span class="fa fa-user"></span>
+                            </div>
+                            <div class="user-wrapper bg-dark">
+                                <a class="user-link" href="">
+                                    <img class="media-object img-thumbnail user-img" alt="User Picture" src="assets/img/user.gif">
+                                    <span class="label label-danger user-label">16</span>
+                                </a>
+                        
+                                <div class="media-body">
+                                    <!-- <h5 class="media-heading">Archie</h5> -->
+                                    <ul class="list-unstyled user-info">
+                                        <li><a href=""><?php echo $_SESSION['user']; ?></a></li>
+                                        <li>Group : <?php echo $_SESSION['data']['group']; ?><br>
+                                        <!-- <li>Last Access : <br>
+                                            <small><i class="fa fa-calendar"></i>&nbsp;16 Mar 16:32</small>
+                                        </li> -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- #menu -->
+                        <ul id="menu" class="bg-blue dker">
+                                  <li class="nav-header">Menu</li>
+                                  <li class="nav-divider"></li>
+                                  <li class="">
+                                    <a href="service-dashboard.html">
+                                      <i class="fa fa-dashboard"></i><span class="link-title">&nbsp;Dashboard</span>
+                                    </a>
+                                  </li>
+                                  <li class="nav-divider"></li>
+                                  <li class="">
+                                    <a href="service-calendar.html">
+                                      <i class="fa fa-calendar"></i><span class="link-title">&nbsp;Calendar</span>
+                                    </a>
+                                  </li>
+                                  <li class="nav-divider"></li>
+                                  <li class="">
+                                    <a href="service-job-insert.html">
+                                      <i class="fa fa-pencil"></i><span class="link-title">&nbsp;Open Case</span>
+                                    </a>
+                                  </li>
+                                  <li class="nav-divider"></li>
+                                  <li class="">
+                                    <a href="service-job-manage.html">
+                                      <i class="fa fa-dashboard"></i><span class="link-title">&nbsp;Manage Case</span>
+                                    </a>
+                                  </li>
+                                  <li class="nav-divider"></li>
+                                  <li class="">
+                                    <a href="service-job-report.html">
+                                      <i class="fa fa-file-text"></i><span class="link-title">&nbsp;Report</span>
+                                    </a>
+                                  </li>                                  
+                                  <li class="nav-divider"></li>
+                                  <li>
+                                    <a href="login.html">
+                                      <i class="fa fa-sign-in"></i>
+                                      <span class="link-title">
+                            Logout
+                            </span>
+                                    </a>
+                                  </li>
+                                  <li></li>
+                                </ul>
+                        <!-- /#menu -->
+                    </div>
+                    <!-- /#left -->
+                <div id="content">
+                    <div class="outer">
+                        <div class="inner bg-light lter">
+                            <div class="text-center">
+    
+</div>
+
+<?php 
+
+    require( "config/php_conf.cfg" );
+    $dbh = new PDO('mysql:host='.$servername.';dbname='.$dbname, $username, $password);
+    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dbh->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+    $dbh->exec("set names utf8");
+
+?>
+
+<!-- <div class="row">
+<div class="text-center col-lg-6">
+    <div class="box">
+        <header>
+        <h5>Your Responsibility Case</h5>
+        </header>
+
+        <?php
+
+            $r_get_active = "SELECT COUNT(`service_id`) counts FROM `service_head` WHERE `status` = 'Active' AND `duty` = '".$_SESSION['user']."'";
+            $responsibility_active = $dbh -> prepare($r_get_active);
+            $responsibility_active -> execute();
+            $r_active = $responsibility_active->fetch();
+
+            $r_get_cancel = "SELECT COUNT(`service_id`) counts FROM `service_head` WHERE `status` = 'Cancel' AND `duty` = '".$_SESSION['user']."'";
+            $responsibility_cancel = $dbh -> prepare($r_get_cancel);
+            $responsibility_cancel -> execute();
+            $r_cancel = $responsibility_cancel->fetch();
+
+            $r_get_done = "SELECT COUNT(`service_id`) counts FROM `service_head` WHERE `status` = 'Done' AND `duty` = '".$_SESSION['user']."'";
+            $responsibility_done = $dbh -> prepare($r_get_done);
+            $responsibility_done -> execute();
+            $r_done = $responsibility_done->fetch();
+
+        ?>
+    
+        <a class="quick-btn" href="#">
+        <i class="fa fa-wrench fa-2x"></i>
+        <span>Active</span>
+        <span class="label label-danger"><?php echo $r_active['counts'] ?></span>
+        </a>
+        <a class="quick-btn" href="#">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+        <span>Cancel</span>
+        <span class="label btn-metis-4"><?php echo $r_cancel['counts'] ?></span>
+        </a>    
+        <a class="quick-btn" href="#">
+        <i class="fa fa-thumbs-o-up fa-2x"></i>
+        <span>Done</span>
+        <span class="label label-success"><?php echo $r_done['counts'] ?></span>
+        </a>
+        
+    </div>
+</div>
+
+<div class="text-center col-lg-6">
+    <div class="box">
+        <header>
+        <h5>Your Generate Case</h5>
+        </header>
+
+        <?php
+
+            $g_get_active = "SELECT COUNT(`service_id`) counts FROM `service_head` WHERE `status` = 'Active' AND `created_by` = '".$_SESSION['user']."'";
+            $generate_active = $dbh -> prepare($g_get_active);
+            $generate_active -> execute();
+            $g_active = $generate_active->fetch();
+
+            $g_get_cancel = "SELECT COUNT(`service_id`) counts FROM `service_head` WHERE `status` = 'Cancel' AND `created_by` = '".$_SESSION['user']."'";
+            $generate_cancel = $dbh -> prepare($g_get_cancel);
+            $generate_cancel -> execute();
+            $g_cancel = $generate_cancel->fetch();
+
+            $g_get_done = "SELECT COUNT(`service_id`) counts FROM `service_head` WHERE `status` = 'Done' AND `created_by` = '".$_SESSION['user']."'";
+            $generate_active = $dbh -> prepare($g_get_done);
+            $generate_active -> execute();
+            $g_done = $generate_active->fetch();
+
+        ?>
+        
+        <a class="quick-btn" href="#">
+        <i class="fa fa-wrench fa-2x"></i>
+        <span>Active</span>
+        <span class="label label-warning"><?php echo $g_active['counts'] ?></span>
+        </a>
+        <a class="quick-btn" href="#">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+        <span>Cancel</span>
+        <span class="label btn-metis-4"><?php echo $g_cancel['counts'] ?></span>
+        </a>
+        <a class="quick-btn" href="#">
+        <i class="fa fa-thumbs-o-up fa-2x"></i>
+        <span>Done</span>
+        <span class="label btn-success"><?php echo $g_done['counts'] ?></span>
+        </a>
+
+
+
+    </div>
+</div>
+
+
+</div> -->
+<div class="row">
+
+    <?php
+
+        $results = $dbh -> prepare($get_percent_action);
+        $results -> execute();
+        $result = $results->fetchAll();                                 
+        
+    ?>
+
+
+
+    
+    <div class="col-lg-12">
+    <div class="box">
+        <header>
+        
+        <h5>Choose Data</h5>       
+            
+            <!-- <label class="switch">
+              <input type="checkbox" id="showAll">
+              <span class="slider round"></span>
+            </label>
+            <h5 style="float: right; margin-right: 10px;">See All Data</h5> -->
+        
+        <!-- <?php echo $_SESSION['data']['group']; ?> -->
+        </header>
+        <div class="body">
+        <div class="row">        
+            <div class="col-lg-2">                           
+                <div class="checkbox anim-checkbox">
+                  <input type="checkbox" id="ch1" name="User Data" value="user" onchange="
+                        box_checked(this.value, this.checked, this.name);
+                        if (this.checked) {froms_select.user = 'A';} else {froms_select.user = '';} ">
+                  <label for="ch1">User Data</label>
+                </div>
+                <div class="checkbox anim-checkbox">
+                  <input type="checkbox" id="ch2" name="Case Data" value="service_head" onchange="
+                        box_checked(this.value, this.checked, this.name);
+                        if (this.checked) {froms_select.service_head = 'B';} else {froms_select.service_head = '';} 
+                        " class="primary">
+                  <label for="ch2">Case Data</label>
+                </div>
+                <div class="checkbox anim-checkbox">
+                  <input type="checkbox" id="ch3" name="Case Devices" value="service_details" class="success" onchange="
+                        box_checked(this.value, this.checked, this.name); 
+                        if (this.checked) {froms_select.service_details = 'C';} else {froms_select.service_details = '';}">
+                  <label for="ch3">Case Devices</label>
+                </div>
+                <div class="checkbox anim-checkbox">
+                  <input type="checkbox" id="ch4" name="Case Action" value="service_action" class="warning"  onchange="
+                        box_checked(this.value, this.checked, this.name);
+                        if (this.checked) {froms_select.service_action = 'D';} else {froms_select.service_action = '';} ">
+                  <label for="ch4">Case Action</label>
+                </div>                
+            </div>
+            <div class="col-lg-4">
+                <label for="ch2">All item</label>
+                <select multiple class="form-control" id="StaffList"> </select>
+            </div>            
+            <div class="col-lg-1">
+                <label for="ch2">Move</label>
+                <input type="button" id="btnAvenger" value=">>" class="btn btn-default" />
+            </div>
+            <div class="col-lg-4">
+                <label for="ch2">Your selected item</label>
+                <select multiple class="form-control" id="PresentList">
+                </select>
+            </div>
+            <div class="col-lg-1">
+                <label for="ch2">OPT</label>
+                <button type="button" class="btn btn-default btn-sm" id="btnAvengerUp">
+                    <span class="glyphicon glyphicon-chevron-up"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" id="btnAvengerDown">
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" id="btnRemoveAvenger">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>                 
+            </div>            
+        </div> 
+        </div>
+        <header>
+        <h5>Condition</h5>
+        </header>
+        <div class="body">
+        <div class="row" >
+            <div id="condition">   
+                <div class="col-lg-3"> <select class="form-control chzn-select" id="condition_column"> </select> </div>
+                <div class="col-lg-2">
+                    <select id="div_operator" class="form-control chzn-select" tabindex="2" onchange="
+
+                        if (this.value == 'BETWEEN') {
+                            extendCondition('condition');
+                        } else {
+                            $('#extend').remove();
+                            $('#extend2').remove();
+                        }
+                    ">
+                        <option value="LIKE">Some text</option>
+                        <option value="=">Equal</option>                        
+                        <option value="!=">NOT Equal</option>                        
+                        <option value=">">></option>
+                        <option value="<"><</option>
+                        <option value="BETWEEN">Between</option>
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <input type="text" id="first_value" placeholder="Your compare valiable" class="form-control">
+                </div>
+
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            function extendCondition (divName) {
+                var newdiv = document.createElement('div');
+                newdiv.innerHTML = "<div class='col-lg-1' id='extend'><input type='text' disabled placeholder= 'AND' class='form-control'></div> <div class='col-lg-3' id='extend2'><input type='text'  id='second_value' placeholder='Second Variable' class='form-control'></div>";
+                document.getElementById(divName).appendChild(newdiv);
+            }
+
+        </script>        
+        </div>
+
+        <header>
+        <h5>Between Date</h5>
+        </header>
+        <div class="body">
+            <div class="row" >
+                <div id="">
+                    <div class="form-group">
+                        <!-- <div class="col-lg-2">
+                            <div class="checkbox">
+                                <label>
+                                    <input class="uniform" type="radio" name="optionsRadios" value="option1" checked>&nbsp;&nbsp;&nbsp;Case Date
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="checkbox">
+                                <label>
+                                    <input class="uniform" type="radio" name="optionsRadios" value="option1" checked>&nbsp;&nbsp;&nbsp;Action Date
+                                </label>
+                            </div>
+                        </div> -->
+
+                        <div class="col-lg-3"> <select class="form-control chzn-select" id="date_column"> </select> </div>                                                
+                        <div class="col-lg-2">
+                            <input type="text" id="start_date" placeholder= "yyyy-mm-dd" class="form-control">
+                        </div>
+                        <div class='col-lg-1'>
+                            <input type='text' disabled placeholder= 'AND' class='form-control'>
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="text" id="end_date" placeholder= "yyyy-mm-dd" class="form-control">
+                        </div>
+                    </div>                
+                    <!-- /.form-group -->
+
+                    <div class="col-lg-1">
+                        <button type="button" class="btn btn-success" onclick="
+
+                                if (
+                                    document.getElementById('ch1').checked == false &&
+                                    document.getElementById('ch2').checked == false &&
+                                    document.getElementById('ch3').checked == false &&
+                                    document.getElementById('ch4').checked == false
+                                    ) {
+                                    alert('Please select your data.');
+                                } else { 
+
+                                    var selectobject = document.getElementById('PresentList')
+                                      for (var i=0; i<selectobject.length; i++){
+                                        if (document.getElementById('PresentList').options[i].id == 'user') {
+                                            query.user[query.user.length] = document.getElementById('PresentList').options[i].value;
+                                        } else 
+                                        if (document.getElementById('PresentList').options[i].id == 'service_head') {
+                                            query.service_head[query.service_head.length] = document.getElementById('PresentList').options[i].value;
+                                        } else 
+                                        if (document.getElementById('PresentList').options[i].id == 'service_details') {
+                                            query.service_details[query.service_details.length] = document.getElementById('PresentList').options[i].value;
+                                        } else 
+                                        if (document.getElementById('PresentList').options[i].id == 'service_action') {
+                                            query.service_action[query.service_action.length] = document.getElementById('PresentList').options[i].value;
+                                        } 
+                                      }
+
+                                      if (  
+                                            query.user.length == 0 &&
+                                            query.service_head.length == 0 &&
+                                            query.service_details.length == 0 &&             
+                                            query.service_action.length == 0 
+
+                                            ) {
+                                            alert('Please select your Item.')
+                                      } else {
+
+                                            
+                                            where.operator    = document.getElementById('div_operator').options[document.getElementById('div_operator').selectedIndex].value;
+                                            where.con_column   = document.getElementById('condition_column').options[document.getElementById('condition_column').selectedIndex].value;
+                                            where.con_table   = document.getElementById('condition_column').options[document.getElementById('condition_column').selectedIndex].id;
+                                            where.first_variable = document.getElementById('first_value').value;
+                                            where.date_column   = document.getElementById('date_column').options[document.getElementById('date_column').selectedIndex].value;
+                                            where.date_table   = document.getElementById('date_column').options[document.getElementById('date_column').selectedIndex].id;
+                                            where.start = document.getElementById('start_date').value;
+                                            where.end   = document.getElementById('end_date').value;
+
+                                            if (!(where.start != '' && where.end != '' || where.start == '' && where.end == '')) {
+                                                alert('Between date inccorrect data.');
+                                            } else {
+
+                                                if ( where.operator == 'BETWEEN' ) {
+                                                
+                                                    if (document.getElementById('second_value').value == '') {
+                                                        alert('Enter your between value.')
+                                                    } else {
+                                                        where.second_variable = document.getElementById('second_value').value;
+                                                        // alert(JSON.stringify(query)+'\n'+JSON.stringify(where));
+                                                          $.post('assets/php/getreport.php', {
+                                                                query : query,
+                                                                from  : froms_select,
+                                                                where : where
+                                                            }, function(data,status) {
+
+                                                                if (data) {
+
+                                                                  // alert(data);      
+                                                                  // location.reload();
+                                                                  console.log(data);
+
+                                                                  var json = JSON.parse(data);
+
+                                                                    // $('#tb_result > thead tr').remove();
+                                                                    // $('#tb_result > thead').append('<tr>');
+
+                                                                    // for (var key in Object.keys(json.data[0])) {
+                                                                    //     if (!isNumeric(Object.keys(json.data[0])[key])) {
+                                                                    //         // alert(Object.keys(json.data[0])[key]);
+                                                                    //         $('#tb_result > thead > tr').append('<th>'+Object.keys(json.data[0])[key]+'</th>');
+                                                                    //         $('#tb_result > thead tr th').attr('contenteditable','true');
+                                                                    //     }
+                                                                       
+                                                                    // }
+                                                                    // $('#tb_result > thead').append('</tr>');
+                                                                    document.getElementById('total').innerHTML = '( '+json.data.length+' )';
+
+                                                                    $('#tb_result > thead tr').remove();
+                                                                    $('#tb_result > thead').append('<tr>');
+                                                                    $('#tb_result > thead > tr').append('<th>No.</th>');
+                                                                     var tb_head = document.getElementById('PresentList')
+                                                                          for (var i=0; i<tb_head.length; i++){
+                                                                            $('#tb_result > thead > tr').append('<th>'+document.getElementById('PresentList').options[i].value+'</th>');
+                                                                                $('#tb_result > thead tr th').attr('contenteditable','true');
+                                                                          }
+                                                                    $('#tb_result > thead').append('</tr>');
+
+
+
+                                                                    $('#tb_result > tbody').empty();
+
+                                                                    json.data.forEach(function(item, index){
+
+                                                                        var no = index+1;
+                                                                        $('#tb_result > tbody').append('<tr>');
+                                                                        $('#tb_result > tbody > tr:last').append('<td>'+no+'</td>');
+
+                                                                        var tb_body = document.getElementById('PresentList')
+                                                                          for (var i=0; i<tb_body.length; i++){
+
+                                                                                $('#tb_result > tbody > tr:last').append('<td>'+item[document.getElementById('PresentList').options[i].value]+'</td>');
+                                                                                // alert(item[document.getElementById('PresentList').options[i].value]);
+                                                                          }
+                                                                        $('#tb_result > tbody').append('</tr>');
+                                                                    });
+
+                                                                    }
+
+                                                            });
+                                                    }
+
+                                                } else {
+                                                    // alert(JSON.stringify(query)+'\n'+JSON.stringify(where));
+                                                    $.post('assets/php/getreport.php', {
+                                                            query : query,
+                                                            from  : froms_select,
+                                                            where : where
+                                                        }, function(data,status) {
+
+                                                            if (data) {
+
+                                                                // alert(data);
+                                                                // alert(document.getElementById('PresentList').length);
+                                                                // alert(json.data.length);   
+                                                                var json = JSON.parse(data);
+                                                                document.getElementById('total').innerHTML = '( '+json.data.length+' )';
+                                                                // alert(Object.keys(json.data[0])[3]);
+                                                                // console.log(JSON.stringify(json.data[0]));
+
+                                                                // $('#tb_result > thead tr').remove();
+                                                                // $('#tb_result > thead').append('<tr>');
+
+                                                                // for (var key in Object.keys(json.data[0])) {
+                                                                //     if (!isNumeric(Object.keys(json.data[0])[key])) {
+                                                                //         // alert(Object.keys(json.data[0])[key]);
+                                                                //         $('#tb_result > thead > tr').append('<th>'+Object.keys(json.data[0])[key]+'</th>');
+                                                                //         $('#tb_result > thead tr th').attr('contenteditable','true');
+                                                                //     }
+                                                                   
+                                                                // }
+                                                                // $('#tb_result > thead').append('</tr>');
+
+                                                                // for (var i =0; i< Object.keys(json.data[0]).length; i++){ 
+                                                                //      alert(JSON.stringify(json.data[0])[i]);
+                                                                // }
+                                                                // alert(json.data[0]['fname']);
+                                                                // alert(json.message);
+                                                                // alert(json.query);
+
+
+                                                                $('#tb_result > thead tr').remove();
+                                                                $('#tb_result > thead').append('<tr>');
+                                                                $('#tb_result > thead > tr').append('<th>No.</th>');
+
+                                                                 var tb_head = document.getElementById('PresentList')
+                                                                      for (var i=0; i<tb_head.length; i++){
+                                                                        $('#tb_result > thead > tr').append('<th>'+document.getElementById('PresentList').options[i].value+'</th>');
+                                                                            $('#tb_result > thead tr th').attr('contenteditable','true');
+                                                                      }
+                                                                $('#tb_result > thead').append('</tr>');
+
+
+                                                                $('#tb_result > tbody').empty();
+
+                                                                json.data.forEach(function(item, index){
+
+
+                                                                    $('#tb_result > tbody').append('<tr>');
+                                                                    var no = index+1;
+                                                                    $('#tb_result > tbody > tr:last').append('<td>'+no+'</td>');
+                                                                    var tb_body = document.getElementById('PresentList')
+                                                                      for (var i=0; i<tb_body.length; i++){
+
+                                                                            $('#tb_result > tbody > tr:last').append('<td>'+item[document.getElementById('PresentList').options[i].value]+'</td>');
+                                                                            // alert(item[document.getElementById('PresentList').options[i].value]);
+                                                                      }
+                                                                    $('#tb_result > tbody').append('</tr>');
+                                                                });
+
+                                                                // alert(json.data.length);
+
+                                                              // location.reload();
+                                                              console.log(data);
+
+                                                            }
+
+                                                        });
+                                                }
+
+                                            }
+                                            
+                                      }
+                                    
+                                }
+
+
+                                    
+                            ">Generate</button>
+                    </div>
+
+                    <div class="col-lg-1">
+                        <button type="button" class="btn btn-warning" onclick="export2excel('tb_result','save')">Export</button>
+                    </div>
+                    <div class="col-lg-1">
+                        <button type="button" class="btn btn-danger" onclick="printlayer('tb_result')">Print</button>
+                    </div>
+
+                    <!-- <div class="col-lg-1">
+                        <button type="button" class="btn btn-success" onclick="">Save</button>
+                    </div> -->
+                        
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <header>
+        <h5>Result</h5><h5 id="total" style="color: blue"></h5>
+        </header>
+        <div class="body">
+        <div class="row">
+            <div id="collapse4" style="overflow:auto;" class="body">
+            <table id="tb_result" class="table table-bordered table-condensed table-hover table-striped">
+                <thead>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+            </div>
+        </div>        
+        </div>
+    </div>
+    </div>
+</div>
+<hr>
+
+
+                        </div>
+                        <!-- /.inner -->
+                    </div>
+                    <!-- /.outer -->
+                </div>
+                <!-- /#content -->
+                    <div id="right" class="bg-light lter">
+                        <div class="alert alert-danger">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <strong>Warning!</strong> Best check yo self, you're not looking too good.
+                        </div>
+                        <!-- .well well-small -->
+                        <div class="well well-small dark">
+                            <ul class="list-unstyled">
+                                <li>Visitor <span class="inlinesparkline pull-right">1,4,4,7,5,9,10</span></li>
+                                <li>Online Visitor <span class="dynamicsparkline pull-right">Loading..</span></li>
+                                <li>Popularity <span class="dynamicbar pull-right">Loading..</span></li>
+                                <li>New Users <span class="inlinebar pull-right">1,3,4,5,3,5</span></li>
+                            </ul>
+                        </div>
+                        <!-- /.well well-small -->
+                        <!-- .well well-small -->
+                        <div class="well well-small dark">
+                            <button class="btn btn-block">Default</button>
+                            <button class="btn btn-primary btn-block">Primary</button>
+                            <button class="btn btn-info btn-block">Info</button>
+                            <button class="btn btn-success btn-block">Success</button>
+                            <button class="btn btn-danger btn-block">Danger</button>
+                            <button class="btn btn-warning btn-block">Warning</button>
+                            <button class="btn btn-inverse btn-block">Inverse</button>
+                            <button class="btn btn-metis-1 btn-block">btn-metis-1</button>
+                            <button class="btn btn-metis-2 btn-block">btn-metis-2</button>
+                            <button class="btn btn-metis-3 btn-block">btn-metis-3</button>
+                            <button class="btn btn-metis-4 btn-block">btn-metis-4</button>
+                            <button class="btn btn-metis-5 btn-block">btn-metis-5</button>
+                            <button class="btn btn-metis-6 btn-block">btn-metis-6</button>
+                        </div>
+                        <!-- /.well well-small -->
+                        <!-- .well well-small -->
+                        <div class="well well-small dark">
+                            <span>Default</span><span class="pull-right"><small>20%</small></span>
+                        
+                            <div class="progress xs">
+                                <div class="progress-bar progress-bar-info" style="width: 20%"></div>
+                            </div>
+                            <span>Success</span><span class="pull-right"><small>40%</small></span>
+                        
+                            <div class="progress xs">
+                                <div class="progress-bar progress-bar-success" style="width: 40%"></div>
+                            </div>
+                            <span>warning</span><span class="pull-right"><small>60%</small></span>
+                        
+                            <div class="progress xs">
+                                <div class="progress-bar progress-bar-warning" style="width: 60%"></div>
+                            </div>
+                            <span>Danger</span><span class="pull-right"><small>80%</small></span>
+                        
+                            <div class="progress xs">
+                                <div class="progress-bar progress-bar-danger" style="width: 80%"></div>
+                            </div>
+                        </div>                    </div>
+                    <!-- /#right -->
+            </div>
+            <!-- /#wrap -->
+            <footer class="Footer bg-dark dker">
+                <p>2016 &copy; Metis Bootstrap Admin Template</p>
+            </footer>
+            <!-- /#footer -->
+            <!-- #helpModal -->
+            <div id="helpModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Modal title</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
+                                et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                                cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                                culpa qui officia deserunt mollit anim id est laborum.
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+            <!-- /.modal -->
+            <!-- /#helpModal -->
+            <!--jQuery -->
+            <script src="assets/lib/jquery/jquery.js"></script>
+
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.2.5/fullcalendar.min.js"></script>
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.18.4/js/jquery.tablesorter.min.js"></script>
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js"></script>
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.selection.min.js"></script>
+                    <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.resize.min.js"></script>
+
+            <!--Bootstrap -->
+            <script src="assets/lib/bootstrap/js/bootstrap.js"></script>
+            <!-- MetisMenu -->
+            <script src="assets/lib/metismenu/metisMenu.js"></script>
+            <!-- Screenfull -->
+            <script src="assets/lib/screenfull/screenfull.js"></script>
+
+
+            <!-- Metis core scripts -->
+            <script src="assets/js/core.js"></script>
+            <!-- Metis demo scripts -->
+            <script src="assets/js/app.js"></script>
+
+            <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> -->
+                <script>
+                    $(function() {
+                      Metis.dashboard();
+                      Metis.formGeneral();
+                    });
+
+                    function isNumeric(value) {
+                        return /^\d+$/.test(value);
+                    }
+
+                    function export2excel(table, name) {
+                        var uri = 'data:application/vnd.ms-excel;base64,'
+                              , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+                              , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))); }
+                              , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }); };
+                            if (!table.nodeType) table = document.getElementById(table);
+                            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+                            window.location.href = uri + base64(format(template, ctx));
+                    }
+
+                    
+
+                    $('#btnAvenger').click(function (e) {
+                        $('select').moveToList('#StaffList', '#PresentList');
+                        e.preventDefault();
+                    });
+
+                    $('#btnRemoveAvenger').click(function (e) {
+                        $('select').removeSelected('#PresentList');
+                        e.preventDefault();
+                    });
+
+                    $('#btnAvengerUp').click(function (e) {
+                        $('select').moveUpDown('#PresentList', true, false);
+                        e.preventDefault();
+                    });
+
+                    $('#btnAvengerDown').click(function (e) {
+                        $('select').moveUpDown('#PresentList', false, true);
+                        e.preventDefault();
+                    });
+
+                    /**
+                     *  jQuery.SelectListActions
+                     *  https://github.com/esausilva/jquery.selectlistactions.js
+                     *
+                     *  (c) http://esausilva.com
+                     */
+
+                    (function ($) {
+                        //Moves selected item(s) from sourceList to destinationList
+                        $.fn.moveToList = function (sourceList, destinationList) {
+                            var opts = $(sourceList + ' option:selected');
+                            if (opts.length == 0) {
+                                alert("Nothing to move");
+                            }
+
+                            $(destinationList).append($(opts).clone());
+                        };
+
+                        //Moves all items from sourceList to destinationList
+                        $.fn.moveAllToList = function (sourceList, destinationList) {
+                            var opts = $(sourceList + ' option');
+                            if (opts.length == 0) {
+                                alert("Nothing to move");
+                            }
+
+                            $(destinationList).append($(opts).clone());
+                        };
+
+                        //Moves selected item(s) from sourceList to destinationList and deleting the
+                        // selected item(s) from the source list
+                        $.fn.moveToListAndDelete = function (sourceList, destinationList) {
+                            var opts = $(sourceList + ' option:selected');
+                            if (opts.length == 0) {
+                                alert("Nothing to move");
+                            }
+
+                            $(opts).remove();
+                            $(destinationList).append($(opts).clone());
+                        };
+
+                        //Moves all items from sourceList to destinationList and deleting
+                        // all items from the source list
+                        $.fn.moveAllToListAndDelete = function (sourceList, destinationList) {
+                            var opts = $(sourceList + ' option');
+                            if (opts.length == 0) {
+                                alert("Nothing to move");
+                            }
+
+                            $(opts).remove();
+                            $(destinationList).append($(opts).clone());
+                        };
+
+                        //Removes selected item(s) from list
+                        $.fn.removeSelected = function (list) {
+                            var opts = $(list + ' option:selected');
+                            if (opts.length == 0) {
+                                alert("Nothing to remove");
+                            }
+
+                            $(opts).remove();
+                        };
+
+                        //Moves selected item(s) up or down in a list
+                        $.fn.moveUpDown = function (list, btnUp, btnDown) {
+                            var opts = $(list + ' option:selected');
+                            if (opts.length == 0) {
+                                alert("Nothing to move");
+                            }
+
+                            if (btnUp) {
+                                opts.first().prev().before(opts);
+                            } else if (btnDown) {
+                                opts.last().next().after(opts);
+                            }
+                        };
+                    })(jQuery);
+
+                    function printlayer(argument) {
+                      // body...                      
+                      var generator = window.open('','name','');
+                      var layertext = document.getElementById(argument);
+                      generator.document.write('<!doctype html> <html> <head>');
+                      generator.document.write('<style> table {font-family: arial, sans-serif; border-collapse: collapse; width: 100%; } td, th {border: 1px solid #dddddd; text-align: left; padding: 8px; width: 50%;} tr:nth-child(even) {background-color: #dddddd; } </style>');
+                      generator.document.write('</head><body>');
+                      // generator.document.write(layertext.innerHTML.replace("Print Me"));
+                      generator.document.write(layertext.outerHTML);
+                      generator.document.write('<hr>');
+                      generator.document.write('</body></html>');
+                      generator.document.close();
+                      generator.focus();
+                      generator.print();
+                      generator.close();
+                    }
+
+                </script>
+
+            <script src="assets/js/style-switcher.js"></script>
+        </body>
+
+</html>
