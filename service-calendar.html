@@ -551,6 +551,54 @@ header('Location: login.html');
                             }
                          }
                       );
+			    
+			$.ajax({
+                            url:  "assets/php/getevents.php",
+                            type: "POST",
+                            data: {},
+                            async:false,
+                            success: function(data){
+                               if (data) {
+                                  
+                                  var json = JSON.parse(data);
+                                  
+                                  json.data.forEach(function(item, index){
+
+
+                                      $.ajax({
+                                          url:  "assets/php/getDataFunction.php",
+                                          type: "POST",
+                                          data: {user_id : item['duty']},
+                                          async:false,
+                                          success: function(data){
+                                             if (data) {
+                                                  // alert(data);
+                                                var json = JSON.parse(data);
+                                                fullname = json.data[0].fname+' '+json.data[0].lname;
+                                             }
+                                          }
+                                       });
+
+                                      // getNamebyId(item['duty']); 
+                                      var piority ='';
+                                      var date ='';
+                                      var begin = item['request_date'].substring(0, 8);
+                                      var end = item['request_date'].substring(8, 10);
+                                      piority = 'label label-primary';
+                                      date = begin+end;                                      
+
+                                      eventsdata.push({
+                                      title:item['service_id']+'\n'+item['service_subject']+'\n'+fullname,
+                                      start:date,
+                                      className: piority
+                                      });                                
+                                  });
+                                  // console.log(JSON.stringify(eventsdata));
+                                  // eventsdata = eventsdata.toString();                                  
+                                }
+                            }
+                         }
+                      );
 
                       console.log(JSON.stringify(eventsdata));
 
